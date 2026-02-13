@@ -17,21 +17,33 @@ captured_images = {}
 
 # 保存原始的save_image方法
 original_save_image = JmImageTool.save_image
+import types  # 在文件顶部添加这个导入
 
+# 存储捕获的图片
+captured_images = {}
 
-@classmethod
-def new_save_image(cls, image: Image.Image, filepath: str):
+# 保存原始的save_image方法
+original_save_image = JmImageTool.save_image
+
+# 定义新的save_image方法（不使用@classmethod装饰器）
+def new_save_image(self, image: Image.Image, filepath: str):
     """
     新的save_image方法，捕获PIL.Image对象
     """
     # 捕获图片对象
     captured_images[filepath] = image
 
-    # 调用原始方法保存文件
-    # return original_save_image(image, filepath)
+    # 如果需要保存原文件，取消下面这行的注释
+    # return original_save_image(self, image, filepath)
 
+# 正确赋值：使用types.MethodType
+JmImageTool.save_image = types.MethodType(new_save_image, JmImageTool)
 
-JmImageTool.save_image = new_save_image
+# 定义新的try_mkdir方法
+def new_try_mkdir(self, save_dir: str):
+    return save_dir
+
+JmcomicText.try_mkdir = types.MethodType(new_try_mkdir, JmcomicText)
 
 # original_try_mkdir = JmcomicText.try_mkdir
 
