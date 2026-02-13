@@ -1,3 +1,4 @@
+import types
 from io import BytesIO
 from flask import Flask, Response, jsonify, request
 from jmcomic import *
