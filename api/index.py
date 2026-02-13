@@ -4,8 +4,10 @@ from flask import Flask, Response, jsonify, request
 from jmcomic import *
 import requests
 import logging
-
 import sys
+from urllib.parse import unquote, quote
+import re
+from PIL import Image
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -17,17 +19,12 @@ app.json.ensure_ascii = False
 captured_images = {}
 
 # 保存原始的save_image方法
-import types  # 确保文件顶部有这行
-
-# 存储捕获的图片
-captured_images = {}
-
-# 保存原始的save_image方法
 original_save_image = JmImageTool.save_image
 
 # 定义新的save_image方法（不使用@classmethod）
 def new_save_image(self, image, filepath):
     captured_images[filepath] = image
+    # 如果需要保存原文件，取消下面这行的注释
     # return original_save_image(self, image, filepath)
 
 # 正确赋值
@@ -38,31 +35,6 @@ def new_try_mkdir(self, save_dir):
     return save_dir
 
 JmcomicText.try_mkdir = types.MethodType(new_try_mkdir, JmcomicText)
-
-    # 如果需要保存原文件，取消下面这行的注释
-    # return original_save_image(self, image, filepath)
-
-# 正确赋值：使用types.MethodType
-JmImageTool.save_image = types.MethodType(new_save_image, JmImageTool)
-
-# 定义新的try_mkdir方法
-def new_try_mkdir(self, save_dir: str):
-    return save_dir
-
-JmcomicText.try_mkdir = types.MethodType(new_try_mkdir, JmcomicText)
-
-# original_try_mkdir = JmcomicText.try_mkdir
-
-
-@classmethod
-def new_try_mkdir(cls, save_dir: str):
-    return save_dir
-
-
-JmcomicText.try_mkdir = new_try_mkdir
-
-from urllib.parse import unquote, quote
-import re
 
 
 def decode_search_value(value: str) -> str:
